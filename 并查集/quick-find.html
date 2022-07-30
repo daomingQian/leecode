@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+<body>
+    <h1>quick-find</h1>
+</body>
+<script>
+    //quick-find原理: 把同一个集合里的值都变为相同的id
+    class UnionFind {
+        constructor(size) {
+            this.size = size;
+            this.root = new Array(size).fill(0);
+            for (let i = 0; i < size; i++) this.root[i] = i;
+        }
+        find(index) {
+            return this.root[index];
+        }
+        union(x, y) {
+            const rootX = this.find(x);
+            const rootY = this.find(y);
+            if (rootX === rootY) return;
+            for (let i = 0; i < this.size; i++) {
+                if (this.root[i] === rootX) {
+                    this.root[i] = rootY;
+                }
+            }
+        }
+        connected(x, y) {
+            return this.find(x) === this.find(y)
+        }
+    }
+
+    let obj = new UnionFind(10)
+    obj.union(3, 7);
+    obj.union(5, 7);
+
+    console.log(obj.root);
+</script>
+
+</html>

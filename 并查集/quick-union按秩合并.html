@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>quick-union按秩合并</h1>
+</body>
+<script>
+    //quick-union 按秩合并原理: 小的集合 归并到 大的集合 (按size)
+    class UnionFind {
+        constructor(size) {
+            this.rank = new Array(size).fill(1); //加一行
+            this.root = new Array(size).fill(0);
+            for (let i = 0; i < size; i++) this.root[i] = i;
+        }
+        find(index) {
+            if (index === this.root[index]) return index;
+            return this.find(this.root[index]);
+        }
+        union(x, y) {
+            const rootX = this.find(x);
+            const rootY = this.find(y);
+            if (rootX === rootY) return;
+            //加几行代码
+            if (this.rank[rootX] >= this.rank[rootY]) {
+                this.rank[rootX] += this.rank[rootY];
+                this.root[rootY] = rootX;
+            } else {
+                this.rank[rootY] += this.rank[rootX];
+                this.root[rootX] = rootY;
+            }
+        }
+        connected(x, y) {
+            return this.find(x) === this.find(y);
+        }
+    }
+
+    let obj = new UnionFind(10);
+    obj.union(0, 1);
+    obj.union(1, 2);
+    obj.union(2, 3);
+    obj.union(3, 4);
+    obj.union(5, 6);
+    obj.union(6, 7);
+    obj.union(7, 8);
+    obj.union(8, 9);
+
+    obj.union(2, 8)
+
+    console.log(obj.connected(2, 7));
+    console.log(obj.connected(2, 7));
+    console.log(obj.connected(8, 7));
+    console.log(obj.connected(8, 9));
+
+    console.log(obj.root);
+    console.log(obj.rank);
+</script>
+
+</html>

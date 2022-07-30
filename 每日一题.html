@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    var largestComponentSize = function (nums) {
+        const m = Math.max(...nums);
+        const uf = new UnionFind(m + 1);
+        for (const num of nums) {
+            for (let i = 2; i * i <= num; i++) {
+                if (num % i === 0) {
+                    console.log(i, num / i, num);
+                    uf.union(num, i);
+                    uf.union(num, num / i);
+                }
+            }
+        }
+        const counts = new Array(m + 1).fill(0);
+        let ans = 0;
+        for (let num of nums) {
+            const root = uf.find(num);
+            counts[root]++;
+            ans = Math.max(ans, counts[root]);
+        }
+        console.log(uf);
+        return uf.rank;
+    };
+
+
+
+
+
+    class UnionFind {
+        constructor(size) {
+            this.parent = new Array(size).fill(0);
+            this.rank = new Array(size).fill(0);
+            for (let i = 0; i < size; i++) this.parent[i] = i;
+        }
+
+        union(x, y) {
+            let rootx = this.find(x);
+            let rooty = this.find(y);
+            if (rootx !== rooty) {
+                if (this.rank[rootx] > this.rank[rooty]) {
+                    this.parent[rooty] = rootx;
+                } else if (this.rank[rootx] < this.rank[rooty]) {
+                    this.parent[rootx] = rooty;
+                } else {
+                    this.parent[rooty] = rootx;
+                    this.rank[rootx]++;
+                }
+            }
+        }
+
+        find(x) {
+            if (this.parent[x] !== x) {
+                this.parent[x] = this.find(this.parent[x]);
+            }
+            return this.parent[x];
+        }
+    }
+    largestComponentSize([2, 3, 6, 7, 4, 12, 21, 39])
+</script>
+
+</html>
