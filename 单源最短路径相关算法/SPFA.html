@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    //基于队列优化的Bellman-Ford算法
+    var networkDelayTime = function (times, n, k) {
+        k--;
+        const map = new Map();
+        for (const [from, next, cost] of times) {
+            if (!map.has(from - 1)) map.set(from - 1, []);
+            map.get(from - 1).push({ next: next - 1, cost });
+        }
+        const queue = [k];
+        const exsit = new Array(n).fill(false);
+        const res = new Array(n).fill(Infinity);
+        exsit[k] = true;
+        res[k] = 0;
+        while (queue.length) {
+            const node = queue.shift();
+            exsit[node] = false;
+            for (const { next, cost } of map.get(node) || []) {
+                if (cost + res[node] < res[next]) {
+                    res[next] = cost + res[node];
+                    if (!exsit[next]) {
+                        exsit[next] = true;
+                        queue.push(next);
+                    }
+                }
+            }
+        }
+
+        return Math.max(...res)
+    };
+    networkDelayTime([[2, 1, 1], [2, 3, 1], [3, 4, 1]],
+        4,
+        2)
+</script>
+
+</html>

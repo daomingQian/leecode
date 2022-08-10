@@ -12,63 +12,60 @@
 
 </body>
 <script>
-    var largestComponentSize = function (nums) {
-        const m = Math.max(...nums);
-        const uf = new UnionFind(m + 1);
-        for (const num of nums) {
-            for (let i = 2; i * i <= num; i++) {
-                if (num % i === 0) {
-                    console.log(i, num / i, num);
-                    uf.union(num, i);
-                    uf.union(num, num / i);
-                }
+    class Heap {
+        constructor(compare) {
+            this.root = [];
+            this.compare = compare;
+        }
+        getParent(index) {
+            return (index - 1) >> 1;
+        }
+        getLeft(index) {
+            return index * 2 + 1;
+        }
+        putUp(index) { //与父节点比较
+            let indexParent = this.getParent(index);
+            while (index > 0 && this.compare(this.root[index], this.root[indexParent])) { //子在前, 父在后
+                this.swap(index, indexParent)
+                index = indexParent;
+                indexParent = this.getParent(index);
             }
         }
-        const counts = new Array(m + 1).fill(0);
-        let ans = 0;
-        for (let num of nums) {
-            const root = uf.find(num);
-            counts[root]++;
-            ans = Math.max(ans, counts[root]);
+        insert(val) { //新增元素
+            this.root.push(val);
+            this.putUp(this.root.length - 1);
+            return this.root;
         }
-        console.log(uf);
-        return uf.rank;
-    };
-
-
-
-
-
-    class UnionFind {
-        constructor(size) {
-            this.parent = new Array(size).fill(0);
-            this.rank = new Array(size).fill(0);
-            for (let i = 0; i < size; i++) this.parent[i] = i;
-        }
-
-        union(x, y) {
-            let rootx = this.find(x);
-            let rooty = this.find(y);
-            if (rootx !== rooty) {
-                if (this.rank[rootx] > this.rank[rooty]) {
-                    this.parent[rooty] = rootx;
-                } else if (this.rank[rootx] < this.rank[rooty]) {
-                    this.parent[rootx] = rooty;
-                } else {
-                    this.parent[rooty] = rootx;
-                    this.rank[rootx]++;
-                }
+        putDown(index) { //与子节点比较
+            let left = this.getLeft(index);
+            let right = left + 1;
+            while ((left < this.root.length && this.compare(this.root[left], this.root[index])) ||
+                (left + 1 < this.root.length && this.compare(this.root[right], this.root[index]))) {
+                let target = left;
+                if (left + 1 < this.root.length && this.compare(this.root[left + 1], this.root[left])) target = left + 1;
+                this.swap(index, target)
+                index = target;
+                left = this.getLeft(index);
+                right = left + 1;
             }
         }
-
-        find(x) {
-            if (this.parent[x] !== x) {
-                this.parent[x] = this.find(this.parent[x]);
-            }
-            return this.parent[x];
+        peck() { //推出堆顶元素
+            if (this.root.length <= 1) return this.root.pop();
+            this.swap(0, this.root.length - 1);
+            const val = this.root.pop();
+            this.putDown(0);
+            return val
+        }
+        isEmpty() { //获取堆顶元素
+            return this.root.length === 0;
+        }
+        swap(index1, index2) {
+            [this.root[index1], this.root[index2]] = [this.root[index2], this.root[index1]];
         }
     }
-    largestComponentSize([2, 3, 6, 7, 4, 12, 21, 39])
+    const heap = new Heap((a, b) => a < b);
+    heap.insert('ADL')
+    heap.insert('AUA')
 </script>
 
 </html>
