@@ -12,60 +12,7 @@
 
 </body>
 <script>
-    class Heap {
-        constructor(compare) {
-            this.root = [];
-            this.compare = compare;
-        }
-        getParent(index) {
-            return (index - 1) >> 1;
-        }
-        getLeft(index) {
-            return index * 2 + 1;
-        }
-        putUp(index) { //与父节点比较
-            let indexParent = this.getParent(index);
-            while (index > 0 && this.compare(this.root[index], this.root[indexParent])) { //子在前, 父在后
-                this.swap(index, indexParent)
-                index = indexParent;
-                indexParent = this.getParent(index);
-            }
-        }
-        insert(val) { //新增元素
-            this.root.push(val);
-            this.putUp(this.root.length - 1);
-            return this.root;
-        }
-        putDown(index) { //与子节点比较
-            let left = this.getLeft(index);
-            let right = left + 1;
-            while ((left < this.root.length && this.compare(this.root[left], this.root[index])) ||
-                (left + 1 < this.root.length && this.compare(this.root[right], this.root[index]))) {
-                let target = left;
-                if (left + 1 < this.root.length && this.compare(this.root[left + 1], this.root[left])) target = left + 1;
-                this.swap(index, target)
-                index = target;
-                left = this.getLeft(index);
-                right = left + 1;
-            }
-        }
-        peck() { //推出堆顶元素
-            if (this.root.length <= 1) return this.root.pop();
-            this.swap(0, this.root.length - 1);
-            const val = this.root.pop();
-            this.putDown(0);
-            return val
-        }
-        isEmpty() { //获取堆顶元素
-            return this.root.length === 0;
-        }
-        swap(index1, index2) {
-            [this.root[index1], this.root[index2]] = [this.root[index2], this.root[index1]];
-        }
-    }
-    const heap = new Heap((a, b) => a < b);
-    heap.insert('ADL')
-    heap.insert('AUA')
+
 </script>
 
 </html>

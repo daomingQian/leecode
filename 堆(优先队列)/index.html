@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    class Heap { //堆(优先队列)
+        constructor(compare) {
+            this.root = [];
+            this.compare = compare;
+        }
+        getParent(index) {
+            return (index - 1) >> 1;
+        }
+        getLeft(index) {
+            return index * 2 + 1;
+        }
+        putUp(index) { //与父节点比较
+            let indexParent = this.getParent(index);
+            while (index > 0 && this.compare(this.root[index], this.root[indexParent])) { //子在前, 父在后
+                this.swap(index, indexParent)
+                index = indexParent;
+                indexParent = this.getParent(index);
+            }
+        }
+        putDown(index) { //与子节点比较
+            let left = this.getLeft(index);
+            let right = left + 1;
+            while ((left < this.root.length && this.compare(this.root[left], this.root[index])) ||
+                (left + 1 < this.root.length && this.compare(this.root[right], this.root[index]))) {
+                let target = left;
+                if (left + 1 < this.root.length && this.compare(this.root[left + 1], this.root[left])) target = left + 1;
+                this.swap(index, target)
+                index = target;
+                left = this.getLeft(index);
+                right = left + 1;
+            }
+        }
+        swap(index1, index2) {
+            [this.root[index1], this.root[index2]] = [this.root[index2], this.root[index1]];
+        }
+        offer(val) { //新增元素
+            this.root.push(val);
+            this.putUp(this.root.length - 1);
+            return this.root;
+        }
+        poll() { //推出堆顶元素
+            if (this.root.length <= 1) return this.root.pop();
+            this.swap(0, this.root.length - 1);
+            const val = this.root.pop();
+            this.putDown(0);
+            return val
+        }
+        peek() { //获取堆顶元素
+            return this.root[0];
+        }
+        isEmpty() { //队列是否为空
+            return this.root.length === 0;
+        }
+    }
+</script>
+
+</html>
