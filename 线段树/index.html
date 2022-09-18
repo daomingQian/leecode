@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    //基本线段树
+    class SegmentTree {
+        constructor(nums) {
+            this.length = nums.length;
+            this.tree = new Array(4 * this.length).fill(0);
+            this.lazy = new Array(4 * this.length).fill(0);
+            this.visited = new Array(4 * this.length).fill(false);
+            this.build(0, this.length - 1, 1, nums);
+        }
+        build(left, right, i, nums) {
+            if (left === right) {
+                this.tree[i] = nums[left]; //i属于tree, left归nums
+                return;
+            }
+            const mid = this.getmid(left, right);
+            this.build(left, mid, 2 * i, nums); //先算左边的
+            this.build(mid + 1, right, 2 * i + 1, nums); //再算右边的
+            this.pushUp(i); //最后算自己的
+        }
+        pushUp(i) { //向上求结果
+            this.tree[i] = this.tree[2 * i] + this.tree[2 * i + 1];
+        }
+        getmid(left, right) { //工具函数: 获取中间索引
+            return left + ((right - left) >> 1);
+        }
+        pointAdd(idx, val) { //单点添加值;
+            const add = (idx, val, left, right, i) => {
+                if (left === right) {
+                    this.tree[i] += val;
+                    return;
+                }
+                const mid = this.getmid(left, right);
+                if (idx <= mid) add(idx, val, left, mid, 2 * i);
+                else add(idx, val, mid + 1, right, 2 * i + 1);
+                this.pushUp(i);
+            }
+            add(idx, val, 0, this.length - 1, 1);
+        }
+
+        pointUpdate(idx, val) { //单点更新值;
+            const update = (idx, val, left, right, i) => {
+                if (left === right) {
+                    this.tree[i] = val;
+                    return;
+                }
+                const mid = this.getmid(left, right);
+                if (idx <= mid) update(idx, val, left, mid, 2 * i);
+                else update(idx, val, mid + 1, right, 2 * i + 1);
+                this.pushUp(i);
+            }
+            update(idx, val, 0, this.length - 1, 1);
+        }
+
+        getValue(idx) { //获取对应索引值;
+            const search = (idx, left, right, i) => {
+                if (left === right) return this.tree[i];
+                const mid = this.getmid(left, right);
+                if (idx <= mid) return search(idx, left, mid, 2 * i);
+                return search(idx, mid + 1, right, 2 * i + 1);
+            }
+            return search(idx, 0, this.length - 1, 1);
+        }
+
+        pushAddDown(left, mid, right, i) { //区间添加懒惰标记下推;
+            this.tree[2 * i] += (mid - left + 1) * this.lazy[i];
+            this.tree[2 * i + 1] += (right - mid) * this.lazy[i];
+            if (left !== mid) this.lazy[2 * i] += this.lazy[i];
+            if (mid + 1 !== right) this.lazy[2 * i + 1] += this.lazy[i];
+            this.lazy[i] = 0;
+        }
+
+        rangeAdd(left, right, val) { //区间添加
+            const add = (l, r, val, left, right, i) => {
+                if (l <= left && right <= r) {
+                    this.tree[i] += (right - left + 1) * val;
+                    if (left !== right) this.lazy[i] += val;
+                    return;
+                }
+                const mid = this.getmid(left, right);
+                if (this.lazy[i] !== 0) this.pushAddDown(left, mid, right, i);
+                if (l <= mid) add(l, r, val, left, mid, 2 * i);
+                if (r > mid) add(l, r, val, mid + 1, right, 2 * i + 1);
+                this.pushUp(i);
+            }
+            add(left, right, val, 0, this.length - 1, 1);
+        }
+
+        sumRangeAdd(left, right) { //区间添加后 求和
+            const sum = (l, r, left, right, i) => {
+                if (l <= left && right <= r) return this.tree[i];
+                const mid = this.getmid(left, right);
+                if (this.lazy[i] !== 0) { //把当前懒惰标记下推, 再求下面的
+                    this.pushAddDown(left, mid, right, i);
+                }
+                let res = 0;
+                if (l <= mid) res += sum(l, r, left, mid, 2 * i);
+                if (r > mid) res += sum(l, r, mid + 1, right, 2 * i + 1);
+                return res;
+            }
+            return sum(left, right, 0, this.length - 1, 1);
+        }
+
+        pushUpdateDown(left, mid, right, i) { //区间更新懒惰标记下推
+            this.tree[2 * i] = (mid - left + 1) * this.lazy[i];
+            this.tree[2 * i + 1] = (right - mid) * this.lazy[i];
+            if (left !== mid) {
+                this.lazy[2 * i] = this.lazy[i];
+                this.visited[2 * i] = true;
+            }
+            if (mid + 1 !== right) {
+                this.lazy[2 * i + 1] = this.lazy[i];
+                this.visited[2 * i + 1] = true;
+            }
+            this.lazy[i] = 0;
+            this.visited[i] = false;
+        }
+
+        rangeUpdate(left, right, val) { //区间更新值
+            const update = (l, r, val, left, right, i) => {
+                if (l <= left && right <= r) {
+                    this.tree[i] = (right - left + 1) * val;
+                    if (left !== right) {
+                        this.lazy[i] = val;
+                        this.visited[i] = true;
+                    }
+                    return;
+                }
+                const mid = this.getmid(left, right);
+                if (this.visited[i]) this.pushUpdateDown(left, mid, right, i);
+                if (l <= mid) update(l, r, val, left, mid, 2 * i);
+                if (r > mid) update(l, r, val, mid + 1, right, 2 * i + 1);
+                this.pushUp(i);
+            }
+            update(left, right, val, 0, this.length - 1, 1);
+        }
+
+        sumRangeUpdate(left, right) { //区间求和
+            const sum = (l, r, left, right, i) => {
+                if (l <= left && right <= r) return this.tree[i];
+                const mid = this.getmid(left, right);
+                if (this.visited[i]) this.pushUpdateDown(left, mid, right, i);
+                let res = 0;
+                if (l <= mid) {
+                    res += sum(l, r, left, mid, 2 * i);
+                }
+                if (r > mid) {
+                    res += sum(l, r, mid + 1, right, 2 * i + 1);
+                }
+                return res;
+            }
+            return sum(left, right, 0, this.length - 1, 1);
+        }
+    }
+    const segmentTree = new SegmentTree([1, 3, 5])
+</script>
+
+</html>

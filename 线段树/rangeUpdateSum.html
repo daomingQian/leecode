@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    class SegmentTree {
+        constructor(nums) {
+            this.length = nums.length;
+            this.tree = new Array(4 * this.length).fill(0);
+            this.lazy = new Array(4 * this.length).fill(0);
+            this.visited = new Array(4 * this.length).fill(false);
+            this.build(0, this.length - 1, 1, nums)
+        }
+        pushUp(i) {
+            this.tree[i] = this.tree[2 * i] + this.tree[2 * i + 1];
+        }
+        getMiddle(left, right) {
+            return left + ((right - left) >> 1);
+        }
+        build(left, right, i, nums) {
+            if (left === right) {
+                this.tree[i] = nums[left];
+                return;
+            }
+            const mid = this.getMiddle(left, right);
+            this.build(left, mid, 2 * i, nums);
+            this.build(mid + 1, right, 2 * i + 1, nums);
+            this.pushUp(i);
+        }
+        pushDown(i) {
+            this.tree[2 * i] = (mid - left + 1) * this.lazy[i];
+            this.tree[2 * i + 1] = (right - mid) * this.lazy[i];
+            this.lazy[2 * i] = this.lazy[i];
+            this.lazy[2 * i + 1] = this.lazy[i];
+            this.visited[2 * i] = true;
+            this.visited[2 * i + 1] = true;
+
+            this.lazy[i] = 0;
+            this.visited[i] = false;
+        }
+        update(left, right, val) {
+            const update = (l, r, val, left, right, i) => {
+                if (l <= left && right <= r) {
+                    this.tree[i] = (right - left + 1) * val;
+                    if (left !== right) {
+                        this.lazy[i] = val;
+                        this.visited[i] = true;
+                    }
+                    return;
+                }
+                const mid = this.getMiddle(left, right);
+                if (this.visited[i]) this.pushDown(i);
+                if (l <= mid) {
+                    update(l, r, val, left, mid, 2 * i);
+                }
+                if (r > mid) {
+                    update(l, r, val, mid + 1, right, 2 * i + 1);
+                }
+                this.pushUp(i);
+            }
+            update(left, right, val, 0, this.length - 1, 1);
+        }
+        sum(left, right) {
+            const sum = (l, r, left, right, i) => {
+                if (l <= left && right <= r) return this.tree[i];
+                const mid = this.getMiddle(left, right);
+                if (this.visited[i]) this.pushDown(i);
+                let res = 0;
+                if (l <= mid) res += sum(l, r, left, mid, 2 * i);
+                if (r > mid) res += sum(l, r, mid + 1, right, 2 * i + 1);
+                return res;
+            }
+            return sum(left, right, 0, this.length - 1, 1);
+        }
+    }
+    const segmentTree = new SegmentTree([1, 2, 3, 4, 5])
+</script>
+
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    function binarySearch(val, nums) { //二分查找
+        let left = 0;
+        let right = nums.length - 1;
+        while (left < right) {
+            const mid = left + ((right - left) >> 1);
+            if (val <= nums[mid]) {
+                right = mid;
+            } else {
+                left = mid + 1
+            }
+        }
+        return left;
+    }
+    var discrete = function (nums) {// 松离散化操作
+        const n = nums.length;
+        const temp = nums.slice().sort((a, b) => a - b);
+        for (let i = 0; i < n; i++) {
+            nums[i] = binarySearch(nums[i], temp) + 1
+        }
+        return nums;
+    };
+</script>
+
+</html>

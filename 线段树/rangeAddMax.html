@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    class SegmentTree {
+        constructor(nums) {
+            this.length = nums.length;
+            this.tree = new Array(4 * this.length).fill(0);
+            this.lazy = new Array(4 * this.length).fill(0);
+            this.build(0, this.length - 1, 1, nums);
+        }
+        pushUp(i) {
+            this.tree[i] = Math.max(this.tree[2 * i], this.tree[2 * i + 1]);
+        }
+        getMiddle(left, right) {
+            return left + ((right - left) >> 1);
+        }
+        build(left, right, i, nums) {
+            if (left === right) {
+                this.tree[i] = nums[left];
+                return;
+            }
+            const mid = this.getMiddle(left, right);
+            this.build(left, mid, 2 * i, nums);
+            this.build(mid + 1, right, 2 * i + 1, nums);
+            this.pushUp(i);
+        }
+        pushDown(left, mid, right, i) {
+            this.tree[2 * i] += this.lazy[i];
+            this.tree[2 * i + 1] += this.lazy[i];
+            this.lazy[2 * i] += this.lazy[i];
+            this.lazy[2 * i + 1] += this.lazy[i];
+            this.lazy[i] = 0;
+        }
+        add(left, right, val) {
+            const add = (l, r, val, left, right, i) => {
+                if (l <= left && right <= r) {
+                    this.tree[i] += val;
+                    if (left !== right) {
+                        this.lazy[i] += val;
+                    }
+                    return;
+                }
+                const mid = this.getMiddle(left, right);
+                if (this.lazy[i] !== 0) this.pushDown(left, mid, right, i);
+                if (l <= mid) add(l, r, val, left, mid, 2 * i);
+                if (r > mid) add(l, r, val, mid + 1, right, 2 * i + 1);
+                this.pushUp(i);
+            }
+            add(left, right, val, 0, this.length - 1, 1);
+        }
+        max(left, right) {
+            const max = (l, r, left, right, i) => {
+                if (l <= left && right <= r) return this.tree[i];
+                const mid = this.getMiddle(left, right);
+                if (this.lazy[i] !== 0) this.pushDown(left, mid, right, i);
+                let res = Number.MIN_SAFE_INTEGER;
+                if (l <= mid) res = Math.max(res, max(l, r, left, mid, 2 * i));
+                if (r > mid) res = Math.max(res, max(l, r, mid + 1, right, 2 * i + 1));
+                return res;
+            }
+            return max(left, right, 0, this.length - 1, 1);
+        }
+    }
+    const segmentTree = new SegmentTree([0, 0, 0, 0, 0, 0, 0, 0])
+</script>
+
+</html>
